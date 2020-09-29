@@ -25,6 +25,7 @@ def commands_handler(message):
 @bot.message_handler(content_types=['text'])
 def text_handler(message):
     if message.text == 'Узнать замены':
+        txt_msg = ''
         get_replacement(message)
 
 

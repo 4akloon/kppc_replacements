@@ -11,7 +11,7 @@ URL = 'https://college.ks.ua/#'
 HEADER = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:81.0) Gecko/20100101 Firefox/81.0',
           'accept': '*/*'}
 
-text_msg = ''
+txt_msg = ''
 
 
 @bot.message_handler(commands=['start', 'help', 'get_replacements'])
@@ -41,17 +41,21 @@ def get_html(url, params=None):
 
 
 def get_content(html, group):
-    txt_msg = ''
+    global txt_msg
     soup = BeautifulSoup(html, 'html.parser')
     items = soup.find_all('div', class_='shedule_content')
+    today = datetime.datetime.today().timetuple()[2]
     for item in items:
         if 'Розклад занять' in item.find('p', class_='shedule_content__title').text:
             continue
         day_title = item.find('p', class_='shedule_content__title').text
         day = day_title[day_title.find('«') + 1:day_title.find('»')]
-        if not datetime.datetime.today().timetuple()[2] <= int(day) < datetime.datetime.today().timetuple()[2] + 8:
-            break
-        txt_msg = text_msg + get_zblock(item, group)
+        if today - 22 > int(day) or int(day) >= today:
+            txt_msg = txt_msg + get_zblock(item, group)
+            print('true')
+            print(txt_msg)
+        else:
+            print('false')
     return txt_msg
 
 
@@ -73,6 +77,7 @@ def get_zblock(block, group):
             txt_msg = txt_msg + f' в {columns[4].text.strip()}\n'
         else:
             txt_msg = txt_msg + '\n'
+
     return txt_msg + '\n'
 
 

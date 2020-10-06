@@ -43,7 +43,7 @@ def start(message):
 
 def get_replacement(message):
     markup = types.ReplyKeyboardRemove()
-    bot.send_message(message.from_user.id, 'Введите номер группы:', reply_markup=markup)
+    bot.send_message(message.from_user.id, 'Введите номер группы/фамилию преподавателя:', reply_markup=markup)
     bot.register_next_step_handler(message, get_replacement_)
 
 
@@ -51,7 +51,11 @@ def get_replacement_(message):
     if message.content_type == 'text':
         markup = types.ReplyKeyboardRemove()
         bot.send_message(message.from_user.id, 'Подождите...', reply_markup=markup)
-        ret = Parse.parse(message.text, 'Replacements', '')
+        try:
+            int(message.text)
+            ret = Parse.parse(message.text, 'ReplacementsGroup', '')
+        except Exception:
+            ret = Parse.parse(message.text, 'ReplacementsTeacher', '')
         if ret:
             bot.send_message(message.from_user.id, ret, parse_mode="markdown")
             start(message)

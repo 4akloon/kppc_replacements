@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 
-
 URL = 'https://college.ks.ua/#'
 HEADER = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:81.0) Gecko/20100101 Firefox/81.0',
           'accept': '*/*'}
@@ -23,8 +22,10 @@ def get_content(html, group, sought, dayofweak):
     txt_msg = ''
     soup = BeautifulSoup(html, 'html.parser')
     items = soup.find_all('div', class_='shedule_content')
-    if sought == 'Replacements':
+    if sought == 'ReplacementsGroup':
         return get_replacements(items, group)
+    if sought == 'ReplacementsTeacher':
+        return get_replacementsT(items, group)
     elif sought == 'Timetable':
         return get_timetables(items, group, dayofweak)
 
@@ -35,7 +36,7 @@ def get_timetables(items, group, dayofweak):
     one = False
     before = True
     for item in items:
-        if not'Розклад занять' in item.find('p', class_='shedule_content__title').text:
+        if not 'Розклад занять' in item.find('p', class_='shedule_content__title').text:
             continue
         elif 'Розклад занять' in item.find('p', class_='shedule_content__title').text and one == True:
             continue
@@ -52,12 +53,14 @@ def get_timetables(items, group, dayofweak):
                     continue
                 if dict_weak[dayofweak] in columns[0].text.strip():
                     if columns[2].text.split():
-                        txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} *' + ' '.join(columns[2].text.split()) + '* _' + ' '.join(columns[3].text.split()) + '_\n'
+                        txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} *' + ' '.join(
+                            columns[2].text.split()) + '* _' + ' '.join(columns[3].text.split()) + '_\n'
                         before = False
                 else:
                     try:
                         int(columns[0].text.strip())
-                        txt_msg = txt_msg + f'{change_num(columns[0].text.strip())} *' + ' '.join(columns[1].text.split()) + '* _' + ' '.join(columns[2].text.split()) + '_\n'
+                        txt_msg = txt_msg + f'{change_num(columns[0].text.strip())} *' + ' '.join(
+                            columns[1].text.split()) + '* _' + ' '.join(columns[2].text.split()) + '_\n'
                     except Exception:
                         break
             elif column_num == 5:
@@ -145,3 +148,37 @@ def change_num(num):
         num = '8️⃣'
     return num
 
+
+def get_replacementsT(items, teacher):
+    txt_msg = ''
+    num_ = 0
+    for item in items:
+        if 'Розклад занять' in item.find('p', class_='shedule_content__title').text:
+            continue
+        if num_ < 2:
+            txt_msg = txt_msg + get_zblockT(item, teacher)
+            num_ = num_ + 1
+        else:
+            break
+    return txt_msg
+
+
+def get_zblockT(block, teacher):
+    day_title = block.find('p', class_='shedule_content__title').text
+    table = block.find('tbody')
+    lines = table.find_all('tr')
+    txt_msg = f'*{day_title}*' + '\n'
+    for line in lines:
+        columns = line.find_all('td')
+        if columns[0].text.strip() == 'Гр.':
+            continue
+        if not (teacher in columns[2].text.strip() or teacher in columns[3].text.strip()):
+            continue
+        if columns[0].text.strip() == '':
+            break
+        txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[0].text.strip()} группа {columns[2].text.strip()} на *{columns[3].text.strip()}*'
+        if columns[4].text.strip():
+            txt_msg = txt_msg + f' в _{columns[4].text.strip()}_\n'
+        else:
+            txt_msg = txt_msg + '\n'
+    return txt_msg + '\n'

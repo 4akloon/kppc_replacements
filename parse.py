@@ -105,20 +105,28 @@ def get_zblock(block, group):
     table = block.find('tbody')
     lines = table.find_all('tr')
     txt_msg = f'*{day_title}*' + '\n'
+    par = True
     for line in lines:
         columns = line.find_all('td')
         if columns[0].text.strip() == 'Гр.':
+            txt_msg = txt_msg + 'Заміни пар:\n'
             continue
-        if columns[0].text.strip() != str(group):
+        elif group in columns[0].text.strip() and par:
+            txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[2].text.strip()} на *{columns[3].text.strip()}*'
+            if columns[4].text.strip():
+                txt_msg = txt_msg + f' в _{columns[4].text.strip()}_\n'
+            else:
+                txt_msg = txt_msg + '\n'
+        elif columns[2].text.strip() == '':
             continue
-        if columns[0].text.strip() == '':
-            break
-        txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[2].text.strip()} на *{columns[3].text.strip()}*'
-        if columns[4].text.strip():
-            txt_msg = txt_msg + f' в _{columns[4].text.strip()}_\n'
-        else:
-            txt_msg = txt_msg + '\n'
-    return txt_msg + '\n'
+        elif columns[2].text.strip() == 'Заміна аудиторій':
+            txt_msg = txt_msg + 'Заміни аудиторій:\n'
+            par = False
+        elif group in columns[0].text.strip() and not par:
+            txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[2].text.strip()} в *{columns[3].text.strip()}*'
+        elif group in columns[4].text.strip() and not par:
+            txt_msg = txt_msg + f'{change_num(columns[5].text.strip())} пара {columns[6].text.strip()} в *{columns[7].text.strip()}*'
+    return txt_msg + '\n\n'
 
 
 def parse(group, sought, dayofweak):
@@ -168,17 +176,24 @@ def get_zblockT(block, teacher):
     table = block.find('tbody')
     lines = table.find_all('tr')
     txt_msg = f'*{day_title}*' + '\n'
+    par = True
     for line in lines:
         columns = line.find_all('td')
         if columns[0].text.strip() == 'Гр.':
+            txt_msg = txt_msg + 'Заміни пар:\n'
             continue
-        if not (teacher in columns[2].text.strip() or teacher in columns[3].text.strip()):
+        elif teacher in columns[2].text.strip() or teacher in columns[3].text.strip():
+            print('lol')
+            txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[0].text.strip()} группа {columns[2].text.strip()} на *{columns[3].text.strip()}*'
+            if columns[4].text.strip():
+                txt_msg = txt_msg + f' в _{columns[4].text.strip()}_\n'
+        elif columns[2].text.strip() == '':
             continue
-        if columns[0].text.strip() == '':
-            break
-        txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[0].text.strip()} группа {columns[2].text.strip()} на *{columns[3].text.strip()}*'
-        if columns[4].text.strip():
-            txt_msg = txt_msg + f' в _{columns[4].text.strip()}_\n'
-        else:
-            txt_msg = txt_msg + '\n'
-    return txt_msg + '\n'
+        elif columns[2].text.strip() == 'Заміна аудиторій':
+            txt_msg = txt_msg + 'Заміни аудиторій:\n'
+            par = False
+        elif teacher in columns[2].text.strip() and not par:
+            txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[2].text.strip()} в *{columns[3].text.strip()}*'
+        elif not par and teacher in columns[6].text.strip():
+            txt_msg = txt_msg + f'{change_num(columns[5].text.strip())} пара {columns[6].text.strip()} в *{columns[7].text.strip()}*'
+    return txt_msg + '\n\n'

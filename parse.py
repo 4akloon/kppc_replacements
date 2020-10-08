@@ -109,7 +109,7 @@ def get_zblock(block, group):
     for line in lines:
         columns = line.find_all('td')
         if columns[0].text.strip() == 'Гр.':
-            txt_msg = txt_msg + 'Заміни пар:\n'
+            txt_msg = txt_msg + '*_Заміни пар:_*\n'
             continue
         elif group in columns[0].text.strip() and par:
             txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[2].text.strip()} на *{columns[3].text.strip()}*'
@@ -120,7 +120,7 @@ def get_zblock(block, group):
         elif columns[2].text.strip() == '':
             continue
         elif columns[2].text.strip() == 'Заміна аудиторій':
-            txt_msg = txt_msg + 'Заміни аудиторій:\n'
+            txt_msg = txt_msg + '*_Заміни аудиторій:_*\n'
             par = False
         elif group in columns[0].text.strip() and not par:
             txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[2].text.strip()} в *{columns[3].text.strip()}*'

@@ -44,15 +44,15 @@ def get_timetables(items, group, dayofweak):
         rows = table.find_all('tr')
         for row in rows:
             columns = row.find_all('td')
-            if columns[2].text.strip() == group:
+            if group == columns[2].text.strip():
                 column_num = 2
-            elif columns[5].text.strip() == group:
+            elif group == columns[5].text.strip():
                 column_num = 5
             elif column_num == 2:
                 if not dict_weak[dayofweak] in columns[0].text.strip() and before:
                     continue
                 if dict_weak[dayofweak] in columns[0].text.strip():
-                    if columns[2].text.split():
+                    if columns[1].text.split():
                         txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} *' + ' '.join(
                             columns[2].text.split()) + '* _' + ' '.join(columns[3].text.split()) + '_\n'
                         before = False
@@ -111,7 +111,7 @@ def get_zblock(block, group):
         if columns[0].text.strip() == 'Гр.':
             txt_msg = txt_msg + '*Заміни пар:*\n'
             continue
-        elif group in columns[0].text.strip() and par:
+        elif str(group) in columns[0].text.strip() and par:
             txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[2].text.strip()} на *{columns[3].text.strip()}*'
             if columns[4].text.strip():
                 txt_msg = txt_msg + f' в _{columns[4].text.strip()}_\n'
@@ -122,9 +122,9 @@ def get_zblock(block, group):
         elif columns[2].text.strip() == 'Заміна аудиторій':
             txt_msg = txt_msg + '*Заміни аудиторій:*\n'
             par = False
-        elif group in columns[0].text.strip() and not par:
+        elif str(group) in columns[0].text.strip() and not par:
             txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[2].text.strip()} в *{columns[3].text.strip()}*'
-        elif group in columns[4].text.strip() and not par:
+        elif str(group) in columns[4].text.strip() and not par:
             txt_msg = txt_msg + f'{change_num(columns[5].text.strip())} пара {columns[6].text.strip()} в *{columns[7].text.strip()}*'
     return txt_msg + '\n\n'
 

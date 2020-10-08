@@ -180,7 +180,7 @@ def get_zblockT(block, teacher):
     for line in lines:
         columns = line.find_all('td')
         if columns[0].text.strip() == 'Гр.':
-            txt_msg = txt_msg + 'Заміни пар:\n'
+            txt_msg = txt_msg + '*_Заміни пар:_*\n'
             continue
         elif teacher in columns[2].text.strip() or teacher in columns[3].text.strip():
             print('lol')
@@ -190,7 +190,7 @@ def get_zblockT(block, teacher):
         elif columns[2].text.strip() == '':
             continue
         elif columns[2].text.strip() == 'Заміна аудиторій':
-            txt_msg = txt_msg + 'Заміни аудиторій:\n'
+            txt_msg = txt_msg + '*_Заміни аудиторій:_*\n'
             par = False
         elif teacher in columns[2].text.strip() and not par:
             txt_msg = txt_msg + f'{change_num(columns[1].text.strip())} пара {columns[2].text.strip()} в *{columns[3].text.strip()}*'

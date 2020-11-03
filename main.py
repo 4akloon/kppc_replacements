@@ -1,5 +1,5 @@
 import telebot
-import configs
+from configs import configs
 from telebot import types
 import parse as Parse
 import datetime

@@ -25,9 +25,9 @@ def commands_handler(message):
 
 @bot.message_handler(content_types=['text'])
 def text_handler(message):
-    if message.text == 'Узнать замены':
+    if message.text == 'Дізнатися заміни':
         get_replacement(message)
-    elif message.text == 'Узнать расписание':
+    elif message.text == 'Дізнатися розклад':
         get_timetable1(message)
     else:
         start(message)
@@ -35,53 +35,45 @@ def text_handler(message):
 
 def start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    btn1 = types.KeyboardButton('Узнать замены')
-    btn2 = types.KeyboardButton('Узнать расписание')
+    btn1 = types.KeyboardButton('Дізнатися заміни')
+    btn2 = types.KeyboardButton('Дізнатися розклад')
     markup.add(btn1, btn2)
-    bot.send_message(message.from_user.id, 'Нажмите кнопку ниже:', reply_markup=markup)
+    bot.send_message(message.from_user.id, 'Виберіть:', reply_markup=markup)
 
 
 def get_replacement(message):
     markup = types.ReplyKeyboardRemove()
-    bot.send_message(message.from_user.id, 'Введите номер группы/фамилию преподавателя:', reply_markup=markup)
+    bot.send_message(message.from_user.id, 'Введіть номер групи/прізвище викладача:', reply_markup=markup)
     bot.register_next_step_handler(message, get_replacement_)
 
 
 def get_replacement_(message):
     if message.content_type == 'text':
         markup = types.ReplyKeyboardRemove()
-        bot.send_message(message.from_user.id, 'Подождите...', reply_markup=markup)
-        try:
-            int(message.text)
-            ret = Parse.parse(message.text, 'ReplacementsGroup', '')
-        except Exception:
-            ret = Parse.parse(message.text, 'ReplacementsTeacher', '')
-        if ret:
-            bot.send_message(message.from_user.id, ret, parse_mode="markdown")
-            start(message)
-        else:
-            bot.send_message(message.from_user.id, 'Нет замен')
-            start(message)
+        bot.send_message(message.from_user.id, 'Зачекайте...', reply_markup=markup)
+        ret = Parse.get_replacements(message.text)
+        bot.send_message(message.from_user.id, ret, parse_mode="markdown")
+        start(message)
     else:
-        bot.send_message(message.from_user.id, 'Неверный ввод')
+        bot.send_message(message.from_user.id, 'Помилка')
         start(message)
 
 
 def get_timetable1(message):
     markup = types.ReplyKeyboardRemove()
-    bot.send_message(message.from_user.id, 'Введите номер группы:', reply_markup=markup)
+    bot.send_message(message.from_user.id, 'Введіть номер групи:', reply_markup=markup)
     bot.register_next_step_handler(message, get_timetable2)
 
 
 def get_timetable2(message):
     markup = types.ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
-    markup.add(types.KeyboardButton('Сегодня'), types.KeyboardButton('Завтра'), types.KeyboardButton('Послезавтра'))
-    markup.add(types.KeyboardButton('Понедельник'))
-    markup.add(types.KeyboardButton('Вторник'))
-    markup.add(types.KeyboardButton('Среда'))
+    markup.add(types.KeyboardButton('Сьогодні'), types.KeyboardButton('Завтра'), types.KeyboardButton('Післязавтра'))
+    markup.add(types.KeyboardButton('Понеділок'))
+    markup.add(types.KeyboardButton('Вівторок'))
+    markup.add(types.KeyboardButton('Середа'))
     markup.add(types.KeyboardButton('Четвер'))
-    markup.add(types.KeyboardButton('Пятница'))
-    bot.send_message(message.from_user.id, 'Введите/Выберите день недели:', reply_markup=markup)
+    markup.add(types.KeyboardButton("П'ятниця"))
+    bot.send_message(message.from_user.id, 'Виберіть день тижня:', reply_markup=markup)
     bot.register_next_step_handler(message, get_timetable3, message.text)
 
 
@@ -111,10 +103,10 @@ def get_timetable3(message, group):
             cont = False
         if cont:
             if dayofweak == 6:
-                dayofweak = 'В субботу нет пар)'
+                dayofweak = 'В суботу немає пар)'
                 cont_ = False
             elif dayofweak == 7:
-                dayofweak = 'В воскресенье нет пар)'
+                dayofweak = 'В неділю немає пар)'
                 cont_ = False
             elif dayofweak == 8:
                 dayofweak = 1
@@ -122,20 +114,20 @@ def get_timetable3(message, group):
                 dayofweak = 2
             if cont_:
                 markup = types.ReplyKeyboardRemove()
-                bot.send_message(message.from_user.id, 'Подождите...', reply_markup=markup)
-                ret = Parse.parse(group, 'Timetable', dayofweak)
+                bot.send_message(message.from_user.id, 'Зачекайте...', reply_markup=markup)
+                ret = Parse.get_timetables(group, dayofweak)
                 if ret:
                     bot.send_message(message.from_user.id, ret, parse_mode="markdown")
                     start(message)
                 else:
-                    bot.send_message(message.from_user.id, 'Неверный ввод')
+                    bot.send_message(message.from_user.id, 'Помилка')
                     start(message)
             else:
                 markup = types.ReplyKeyboardRemove()
                 bot.send_message(message.from_user.id, dayofweak, reply_markup=markup)
                 start(message)
     else:
-        bot.send_message(message.from_user.id, 'Неверный ввод')
+        bot.send_message(message.from_user.id, 'Помилка')
         bot.register_next_step_handler(message, get_timetable3, group)
 
 

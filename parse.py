@@ -137,52 +137,55 @@ def get_zblock(block, message):
     par = True
     z_par = ''
     z_aud = ''
-    print(lines)
     for line in lines:
         columns = line.find_all('td')
-        # Пропускаем первую строчку
-        if columns[0].text.strip() == 'Гр.':
-            continue
-        # Ищем совпадения в заменах пар
-        elif par and str(message) in columns[0].text.strip() or \
-                str(message) in columns[2].text.strip() or \
-                str(message) in columns[3].text.strip():
-            z_par += f'{stick_num[columns[1].text.strip()]} пара ' \
-                     f'{columns[0].text.strip()} група ' \
-                     f'{columns[2].text.strip()} на ' \
-                     f'*{columns[3].text.strip()}*'
-            # Если указана аудитория дописываем
-            if columns[4].text.strip():
-                z_par += f' в _{columns[4].text.strip()}_\n'
-            else:
-                z_par += '\n'
-        # Пропуск пустых блоков в заменах пар
-        elif columns[2].text.strip() == '':
-            continue
-        # Нахождения блока замен аудиторий и конкатенация замен пар
-        elif columns[2].text.strip() == 'Заміна аудиторій':
-            if z_par:
-                txt_msg += '*Заміни пар:*\n' + z_par
-            else:
-                txt_msg += '*Замін пар немає*\n'
-            par = False
-        # Ищем совпадения в заменах аудиторий по первому столбцу
-        elif not par and str(message) in columns[0].text.strip() or \
-                str(message) in columns[2].text.strip():
-            z_aud += f'{columns[0].text.strip()} група ' \
-                     f'{stick_num[columns[1].text.strip()]} пара ' \
-                     f'{columns[2].text.strip()} в ' \
-                     f'*{columns[3].text.strip()}*'
-        # Ищем совпадения в заменах аудиторий по второму столбцу
-        elif not par and str(message) in columns[4].text.strip() or \
-                str(message) in columns[6].text.strip():
-            z_aud += f'{columns[4].text.strip()} група ' \
-                     f'{stick_num[columns[5].text.strip()]} пара ' \
-                     f'{columns[6].text.strip()} в ' \
-                     f'*{columns[7].text.strip()}*'
-        # Конкатенация замен аудиторий
-    if z_aud:
-        txt_msg += '*Заміни аудиторій:*\n' + z_aud
-    else:
-        txt_msg += '*Замін аудиторій немає*\n'
+        if par:
+            # Пропускаем первую строчку
+            if columns[0].text.strip() == 'Гр.':
+                continue
+            # Ищем совпадения в заменах пар
+            elif str(message) in columns[0].text.strip() or \
+                    str(message) in columns[2].text.strip() or \
+                    str(message) in columns[3].text.strip():
+                z_par += f'{stick_num[columns[1].text.strip()]} пара ' \
+                         f'{columns[0].text.strip()} група ' \
+                         f'{columns[2].text.strip()} на ' \
+                         f'*{columns[3].text.strip()}*'
+                # Если указана аудитория дописываем
+                if columns[4].text.strip():
+                    z_par += f' в _{columns[4].text.strip()}_\n'
+                else:
+                    z_par += '\n'
+            # Пропуск пустых блоков в заменах пар
+            elif columns[2].text.strip() == '':
+                continue
+            # Нахождения блока замен аудиторий и конкатенация замен пар
+            elif columns[2].text.strip() == 'Заміна аудиторій':
+                if z_par:
+                    txt_msg += '*Заміни пар:*\n' + z_par
+                else:
+                    txt_msg += '*Замін пар немає*\n'
+                par = False
+                continue
+        else:
+            if columns[2].text.strip() == '':
+                if z_aud:
+                    txt_msg += '*Заміни аудиторій:*\n' + z_aud
+                else:
+                    txt_msg += '*Замін аудиторій немає*\n'
+                break
+            # Ищем совпадения в заменах аудиторий по первому столбцу
+            elif str(message) in columns[0].text.strip() or \
+                    str(message) in columns[2].text.strip():
+                z_aud += f'{columns[0].text.strip()} група ' \
+                         f'{stick_num[columns[1].text.strip()]} пара ' \
+                         f'{columns[2].text.strip()} в ' \
+                         f'*{columns[3].text.strip()}*'
+            # Ищем совпадения в заменах аудиторий по второму столбцу
+            elif str(message) in columns[4].text.strip() or \
+                    str(message) in columns[6].text.strip():
+                z_aud += f'{columns[4].text.strip()} група ' \
+                         f'{stick_num[columns[5].text.strip()]} пара ' \
+                         f'{columns[6].text.strip()} в ' \
+                         f'*{columns[7].text.strip()}*'
     return txt_msg + '\n\n'
